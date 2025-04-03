@@ -16,8 +16,7 @@ LearnX is a user-friendly educational platform built with the **MERN Stack**. It
 ---
 
 ## 🎯 Features  
-✅ User Authentication (Login & Signup)  
-✅ Course Catalog with Categories  
+✅ User Authentication (Login & Signup)   
 ✅ Course Enrollment System  
 ✅ Light & Dark Mode for Better Accessibility  
 ✅ Secure Payment Integration 
