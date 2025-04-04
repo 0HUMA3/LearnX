@@ -1,7 +1,9 @@
 import { School, Menu } from "lucide-react";
 import React from "react";
-import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
+import { userLoggedOut } from "@/features/authSlice";
 import {
   DropdownMenu,
   DropdownMenuGroup,
@@ -9,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuContent,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import DarkMode from "@/DarkMode";
@@ -20,16 +22,24 @@ import {
   SheetContent,
   SheetFooter,
   SheetHeader,
-  SheetTitle
+  SheetTitle,
 } from "./ui/sheet";
 
 const Navbar = () => {
-  const user = false; // Change based on authentication
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+  const handleLogout = () => {
+    dispatch(userLoggedOut()); // Clear Redux store
+    navigate("/login", { state: { message: "User logged out successfully" } });
+  };
 
   return (
     <div className="h-16 dark:bg-[#0A0A0A] bg-white border-b dark:border-b-gray-800 border-b-gray-200 fixed top-0 left-0 right-0 duration-300 z-10">
       <div className="max-w-7xl mx-auto hidden md:flex justify-between items-center gap-10 h-full px-4">
-        
+
         {/* Logo */}
         <div className="flex items-center gap-2">
           <School size={30} className="text-black dark:text-white" />
@@ -40,41 +50,51 @@ const Navbar = () => {
 
         {/* Navbar Actions */}
         <div className="flex items-center gap-8">
-          {user ? (
+          {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                  <AvatarFallback>CN</AvatarFallback>
+                  <AvatarImage src={user?.photoUrl || "https://github.com/shadcn.png"} alt={user?.name} />
+                  <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
+
+              <DropdownMenuContent className="w-56 bg-white text-black dark:bg-black dark:text-white border border-gray-300 dark:border-gray-700">
+                <DropdownMenuLabel className="font-bold">My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-gray-300 dark:bg-gray-700" />
+
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
                     <Link to="/my-learning">My Learning</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/edit-profile">Edit Profile</Link>
+                    <Link to="/profile">Edit Profile</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/logout">Log out</Link>
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                    Log out
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/dashboard">Dashboard</Link>
-                </DropdownMenuItem>
+                {
+                  user.role === "instructor" && (
+                    <>
+                      <DropdownMenuSeparator className="bg-gray-300 dark:bg-gray-700" />
+                      <DropdownMenuItem asChild>
+                        <Link to="/dashboard">Dashboard</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )
+                }
+
+
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
-              <Button asChild className="text-black dark:text-white border border-black dark:border-white">
+              <Button asChild onClick={() => navigate("/login")} className="text-black dark:text-white border border-black dark:border-white">
                 <Link to="/login">Login</Link>
               </Button>
-              <Button asChild className="text-black dark:text-white border border-black dark:border-white">
-                <Link to="/signup">Signup</Link>
+              <Button asChild onClick={() => navigate("/login")} className="text-black dark:text-white border border-black dark:border-white">
+                <Link to="/login">Signup</Link>
               </Button>
             </div>
           )}
@@ -96,7 +116,16 @@ const Navbar = () => {
 export default Navbar;
 
 const MobileNavbar = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const role = "instructor"; // Replace with dynamic role if needed
+
+  const handleLogout = () => {
+    dispatch(userLoggedOut());
+    navigate("/login", { state: { message: "User logged out successfully" } });
+  };
 
   return (
     <Sheet>
@@ -113,18 +142,27 @@ const MobileNavbar = () => {
         </SheetHeader>
 
         <nav className="flex flex-col space-y-4 mt-4">
-          <Link to="/my-learning" className="cursor-pointer">
-            My Learning
-          </Link>
-          <Link to="/edit-profile" className="cursor-pointer">
-            Edit Profile
-          </Link>
-          <Link to="/logout" className="cursor-pointer">
-            Log out
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link to="/my-learning" className="cursor-pointer">
+                My Learning
+              </Link>
+              <Link to="/edit-profile" className="cursor-pointer">
+                Edit Profile
+              </Link>
+              <button onClick={handleLogout} className="text-left cursor-pointer">
+                Log out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">Login</Link>
+              <Link to="/signup">Signup</Link>
+            </>
+          )}
         </nav>
 
-        {role === "instructor" && (
+        {isAuthenticated && role === "instructor" && (
           <SheetFooter className="mt-4">
             <SheetClose asChild>
               <Button asChild>
