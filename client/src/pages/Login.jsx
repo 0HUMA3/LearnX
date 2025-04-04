@@ -16,13 +16,12 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import {
-  useLoginUserMutation,
-  useRegisterUserMutation,
-} from "@/features/api/authApi";
+import { useLoginUserMutation, useRegisterUserMutation } from "@/features/api/authApi";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { userLoggedIn } from "@/features/authSlice";
 
 const Login = () => {
   const [signupInput, setSignupInput] = useState({
@@ -31,6 +30,10 @@ const Login = () => {
     password: "",
   });
   const [loginInput, setLoginInput] = useState({ email: "", password: "" });
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation(); // 👈 For accessing route state
 
   const [
     registerUser,
@@ -42,8 +45,7 @@ const Login = () => {
     { data: loginData, error: loginError, isLoading: loginIsLoading, isSuccess: loginIsSuccess },
   ] = useLoginUserMutation();
 
-  const navigate = useNavigate();
-
+  // Handle input changes
   const changeInputHandler = (e, type) => {
     const { name, value } = e.target;
     if (type === "signup") {
@@ -53,12 +55,14 @@ const Login = () => {
     }
   };
 
+  // Handle Registration & Login
   const handleRegistration = async (type) => {
     const inputData = type === "signup" ? signupInput : loginInput;
     const action = type === "signup" ? registerUser : loginUser;
     await action(inputData);
   };
 
+  // Handle Signup Response
   useEffect(() => {
     if (registerIsSuccess && registerData) {
       toast.success(registerData.message || "Signup successful.");
@@ -68,31 +72,41 @@ const Login = () => {
     }
   }, [registerIsSuccess, registerData, registerError]);
 
+  // Handle Login Response
   useEffect(() => {
     if (loginIsSuccess && loginData) {
       toast.success(loginData.message || "Login successful.");
-      localStorage.setItem("token", loginData.token); // Store token
-      navigate("/", { replace: true }); // Redirect to home page
+      
+      localStorage.setItem("token", loginData.token);
+      dispatch(userLoggedIn({ user: loginData.user, token: loginData.token }));
+      navigate("/", { replace: true });
     }
     if (loginError) {
       toast.error(loginError?.data?.message || "Login Failed");
     }
-  }, [loginIsSuccess, loginData, loginError, navigate]);
+  }, [loginIsSuccess, loginData, loginError, navigate, dispatch]);
+
+  // ✅ Show logout message toast if passed from navigation
+  useEffect(() => {
+    if (location.state?.message) {
+      toast.success(location.state.message);
+    }
+  }, [location.state]);
 
   return (
     <div className="flex items-center w-full justify-center mt-20">
-      <Tabs defaultValue="account" className="w-[400px]">
+      <Tabs defaultValue="login" className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="signup">Signup</TabsTrigger>
           <TabsTrigger value="login">Login</TabsTrigger>
         </TabsList>
+
+        {/* Signup Tab */}
         <TabsContent value="signup">
           <Card>
             <CardHeader>
               <CardTitle>Signup</CardTitle>
-              <CardDescription>
-                Create a new account and click signup when you're done.
-              </CardDescription>
+              <CardDescription>Create a new account and click signup when you're done.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="space-y-1">
@@ -146,13 +160,13 @@ const Login = () => {
             </CardFooter>
           </Card>
         </TabsContent>
+
+        {/* Login Tab */}
         <TabsContent value="login">
           <Card>
             <CardHeader>
               <CardTitle>Login</CardTitle>
-              <CardDescription>
-                Login your password here. After signup, you'll be logged in.
-              </CardDescription>
+              <CardDescription>Enter your credentials to log in.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="space-y-1">
