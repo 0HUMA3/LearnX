@@ -1,49 +1,86 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
-import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import HeroSection from "./pages/student/HeroSection";
 import MainLayout from "./layout/MainLayout.jsx";
 import Courses from "./pages/student/Courses";
 import MyLearning from "./pages/student/MyLearning";
 import Profile from "./pages/student/Profile";
+import Sidebar from "./pages/admin/lecture/Sidebar";
+import Dashboard from "./pages/admin/lecture/Dashboard";
+import CourseTable from "./pages/admin/course/CourseTable";
+import { Outlet } from "react-router-dom";
+import AddCourse from "./pages/admin/course/AddCourse";
 
+const AdminLayout = () => (
+  <div className="flex h-screen">
+    <Sidebar />
+    <div className="flex-1 overflow-auto p-5"> 
+      <Outlet />
+    </div>
+  </div>
+);
 
 const appRouter = createBrowserRouter([
   {
     path: "/",
     element: <MainLayout />,
-    children:[
+    children: [
       {
         path: "/",
         element: (
-        <>
-        <HeroSection />
-        <Courses/> 
-        </>
+          <>
+            <HeroSection />
+            <Courses />
+          </>
         ),
       },
       {
         path: "login",
-        element: <Login/>,
+        element: <Login />,
       },
       {
-        path: "my-Learning",
-        element: <MyLearning/>,
+        path: "my-learning",
+        element: <MyLearning />,
       },
       {
         path: "profile",
-        element: <Profile/>,
+        element: <Profile />,
+      },
+      {
+        path: "admin",
+        element: <AdminLayout />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="dashboard" replace />,
+          },
+          {
+            path: "dashboard",
+            element: <Dashboard />,
+          },
+          {
+            path: "course",
+            element: <CourseTable />,
+          },
+          {
+            path: "course/create",
+            element: <AddCourse />,
+          },
+        ],
       },
     ],
   },
 ]);
 
-function App(){
+function App() {
   return (
     <main>
-      <RouterProvider router = {appRouter}/>
-      </main>
+      <RouterProvider router={appRouter} />
+      <ToastContainer position="bottom-center" />
+    </main>
   );
 }
 

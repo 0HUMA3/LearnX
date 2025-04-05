@@ -4,26 +4,54 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import connectDB from "./database/db.js";
 import userRoute from "./routes/user.route.js";
+import courseRoute from "./routes/course.route.js";
 
-dotenv.config({});
+// ✅ Load environment variables from .env file
+dotenv.config();
 
+// ✅ Connect to MongoDB or your database
 connectDB();
+
+// ✅ Initialize Express app
 const app = express();
+const PORT = process.env.PORT || 8080;
 
-const PORT = process.env.PORT || 3000;
-// default middleware
-app.use(express.json()); 
+// ✅ Middleware for JSON parsing (increase payload limit if needed)
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true }));
 
+// ✅ Enable Cookie Parsing
 app.use(cookieParser());
-app.use(cors({
-    origin:"http://localhost:5173",
-    credentials:true
-}));
 
+// ✅ Enable and Configure CORS
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Frontend URL
+    credentials: true,              // Allow cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
+// ✅ Handle Preflight CORS Requests (Optional but safe)
+app.options("*", cors());
 
+// ✅ API Routes
 app.use("/api/v1/user", userRoute);
+app.use("/api/v1/course", courseRoute);
 
+// ✅ Default Root Route
+app.get("/", (req, res) => {
+  res.send("API is running...");
+});
+
+// ✅ Global Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error("🔥 Error:", err.message);
+  res.status(500).json({ message: err.message });
+});
+
+// ✅ Start Express Server
 app.listen(PORT, () => {
-    console.log(`Server listen at port ${PORT}`);
-})
+  console.log(`Server running at http://localhost:${PORT}`);
+});
