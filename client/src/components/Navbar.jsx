@@ -32,7 +32,7 @@ const Navbar = () => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   const handleLogout = () => {
-    dispatch(userLoggedOut()); // Clear Redux store
+    dispatch(userLoggedOut());
     navigate("/login", { state: { message: "User logged out successfully" } });
   };
 
@@ -74,18 +74,16 @@ const Navbar = () => {
                     Log out
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
-                {
-                  user.role === "instructor" && (
-                    <>
-                      <DropdownMenuSeparator className="bg-gray-300 dark:bg-gray-700" />
-                      <DropdownMenuItem asChild>
-                        <Link to="/dashboard">Dashboard</Link>
-                      </DropdownMenuItem>
-                    </>
-                  )
-                }
 
-
+                {/* ✅ UPDATED PART HERE */}
+                {user.role === "instructor" && (
+                  <>
+                    <DropdownMenuSeparator className="bg-gray-300 dark:bg-gray-700" />
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
@@ -120,7 +118,7 @@ const MobileNavbar = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const role = "instructor"; // Replace with dynamic role if needed
+  const role = user?.role || "student";
 
   const handleLogout = () => {
     dispatch(userLoggedOut());
@@ -166,7 +164,7 @@ const MobileNavbar = () => {
           <SheetFooter className="mt-4">
             <SheetClose asChild>
               <Button asChild>
-                <Link to="/dashboard">Dashboard</Link>
+                <Link to="/admin/dashboard">Dashboard</Link>
               </Button>
             </SheetClose>
           </SheetFooter>
