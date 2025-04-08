@@ -63,14 +63,14 @@ const CourseTable = () => {
             {courses ? (
               courses.map((course) => (
                 <TableRow key={course._id}>
-                  <TableCell className="font-medium">${course.price || "NA"}</TableCell>
+                  <TableCell className="font-medium">{course.price ? `${course.price}` : '$NA'}</TableCell>
                   <TableCell> <Badge>{course.isPublished ? "Published" : "Draft"}</Badge> </TableCell>
                   <TableCell>{course.courseTitle}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       className="text-blue-600"
                       variant="ghost"
-                      onClick={() => navigate(`/admin/course/edit/${course._id}`)}
+                      onClick={() => navigate(`${course._id}`)}
                     >
                       Edit
                     </Button>

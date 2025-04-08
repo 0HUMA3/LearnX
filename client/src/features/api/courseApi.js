@@ -8,16 +8,19 @@ export const courseApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: COURSE_API,
     credentials: "include", // Include cookies if needed
-    prepareHeaders: (headers) => {
-      headers.set("Content-Type", "application/json");
+    prepareHeaders: (headers, { endpoint }) => {
+      // ✅ Skip setting Content-Type for FormData (editCourse)
+      if (endpoint !== "editCourse") {
+        headers.set("Content-Type", "application/json");
+      }
       return headers;
     },
   }),
   endpoints: (builder) => ({
-    // ✅ POST endpoint to create a course
+    // ✅ Create course (POST)
     createCourse: builder.mutation({
       query: ({ title, category }) => ({
-        url: "", // ✅ Update this if your endpoint is /create
+        url: "/",
         method: "POST",
         body: { title, category },
       }),
@@ -28,17 +31,37 @@ export const courseApi = createApi({
       invalidatesTags: ["Refetch_Creator_Course"],
     }),
 
-    // ✅ GET endpoint to fetch creator's courses
+    // ✅ Get all courses for the logged-in creator (GET)
     getCreatorCourse: builder.query({
       query: () => ({
-        url: "/", // ✅ Notice it's just /course, no /get-courses
+        url: "/",
         method: "GET",
       }),
-      credentials: "include", // ✅ only if using cookies for session/auth
       providesTags: ["Refetch_Creator_Course"],
-    }),    
+    }),
+
+    // ✅ Edit course (PUT with FormData)
+    editCourse: builder.mutation({
+      query: ({ formData, courseId }) => ({
+        url: `/${courseId}`,
+        method: "PUT",
+        body: formData, // ✔️ FormData sets its own headers
+      }),
+      invalidatesTags: ["Refetch_Creator_Course"],
+    }),
+    getCourseById: builder.query({
+      query: (courseId) => ({
+        url: `/${courseId}`,
+        method:"GET"
+      })
+    })
   }),
 });
 
 // ✅ Export auto-generated hooks
-export const { useCreateCourseMutation, useGetCreatorCourseQuery } = courseApi;
+export const {
+  useCreateCourseMutation,
+  useGetCreatorCourseQuery,
+  useEditCourseMutation,
+  useGetCourseByIdQuery
+} = courseApi;

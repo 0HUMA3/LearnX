@@ -1,22 +1,20 @@
 import { Course } from "../models/course.model.js";
-import { uploadMedia } from "../utils/cloudinary.js";
+import { uploadMedia, deleteMediaFromCloudinary } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 
-
+// CREATE COURSE
 export const createCourse = async (req, res) => {
     try {
-        const { title, category} = req.body;
-        const courseImage = req.file; // Uploaded file (if any)
+        const { title, category } = req.body;
+        const courseImage = req.file;
 
-        // Validate input fields
-        if (!title || !category) {
+        if (!title?.trim() || !category?.trim()) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required."
             });
         }
 
-        // Check if course already exists
         const existingCourse = await Course.findOne({ title });
         if (existingCourse) {
             return res.status(400).json({
@@ -26,18 +24,16 @@ export const createCourse = async (req, res) => {
         }
 
         let courseImageUrl = "";
-
-        // Upload course image if provided
         if (courseImage) {
             const uploadResponse = await uploadMedia(courseImage.path);
             courseImageUrl = uploadResponse.secure_url;
         }
 
-        // Create a new course
         const newCourse = await Course.create({
-            courseTitle:title,
+            courseTitle: title,
             category,
-            creator:new mongoose.Types.ObjectId("67eee64efa26d34cb81a0684") 
+            courseThumbnail: courseImageUrl,
+            creator: new mongoose.Types.ObjectId("67eee64efa26d34cb81a0684") // Replace with dynamic ID if needed
         });
 
         return res.status(201).json({
@@ -55,26 +51,107 @@ export const createCourse = async (req, res) => {
     }
 };
 
-export default createCourse;
-
+// GET CREATOR COURSES
 export const getCreatorCourses = async (req, res) => {
-        try {
-            const userId = req.id;
-        const courses = await Course.find({creator:userId});
-        if(!courses){
+    try {
+        const userId = req.id;
+        const courses = await Course.find({ creator: userId });
+
+        if (!courses || courses.length === 0) {
             return res.status(404).json({
-                courses:[],
-                message:"Course not found"
-            })
-        };
+                courses: [],
+                message: "No courses found for this creator."
+            });
+        }
+
         return res.status(200).json({
-            courses,
-        })
-        } catch (error) {
-            console.error(error);
+            success: true,
+            courses
+        });
+
+    } catch (error) {
+        console.error(error);
         return res.status(500).json({
             success: false,
-            message: "Failed to create course."
+            message: "Failed to fetch courses."
         });
+    }
+};
+
+// EDIT COURSE
+export const editCourse = async (req, res) => {
+    try {
+        const courseId = req.params.courseId;
+        const { courseTitle, subTitle, description, category, courseLevel, coursePrice } = req.body;
+        const thumbnail = req.file;
+
+        let course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found!"
+            });
         }
+
+        let courseThumbnail;
+        if (thumbnail) {
+            if (course.courseThumbnail) {
+                const publicId = course.courseThumbnail.split("/").pop().split(".")[0];
+                await deleteMediaFromCloudinary(publicId);
+            }
+            courseThumbnail = await uploadMedia(thumbnail.path);
+        }
+
+        const updateData = {
+            courseTitle,
+            subTitle,
+            description,
+            category,
+            courseLevel,
+            coursePrice
+        };
+
+        if (courseThumbnail?.secure_url) {
+            updateData.courseThumbnail = courseThumbnail.secure_url;
+        }
+
+        course = await Course.findByIdAndUpdate(courseId, updateData, { new: true });
+
+        return res.status(200).json({
+            success: true,
+            message: "Course updated successfully.",
+            course
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update course."
+        });
+    }
+};
+
+export default createCourse;
+
+export const getCourseById = async (req,res) => {
+    try {
+        const {courseId} = req.params;
+
+        const course = await Course.findById(courseId);
+
+        if(!course){
+            return res.status(404).json({
+                message:"Course not found!"
+            })
+        }
+        return res.status(200).json({
+            course
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Failed to get course by id"
+        });
+    }
 }

@@ -13,6 +13,7 @@ import Dashboard from "./pages/admin/lecture/Dashboard";
 import CourseTable from "./pages/admin/course/CourseTable";
 import { Outlet } from "react-router-dom";
 import AddCourse from "./pages/admin/course/AddCourse";
+import EditCourse from "./pages/admin/course/EditCourse";
 
 const AdminLayout = () => (
   <div className="flex h-screen">
@@ -68,6 +69,10 @@ const appRouter = createBrowserRouter([
           {
             path: "course/create",
             element: <AddCourse />,
+          },
+          {
+            path: "course/:courseId",
+            element: <EditCourse />,
           },
         ],
       },
