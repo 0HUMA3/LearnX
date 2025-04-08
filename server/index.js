@@ -5,6 +5,7 @@ import cors from "cors";
 import connectDB from "./database/db.js";
 import userRoute from "./routes/user.route.js";
 import courseRoute from "./routes/course.route.js";
+import mediaRoute from "./routes/media.route.js";
 
 // ✅ Load environment variables from .env file
 dotenv.config();
@@ -37,6 +38,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // ✅ API Routes
+app.use("/api/v1/media", mediaRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/course", courseRoute);
 

@@ -4,10 +4,10 @@ const COURSE_API = "http://localhost:8080/api/v1/course";
 
 export const courseApi = createApi({
   reducerPath: "courseApi",
-  tagTypes: ["Refetch_Creator_Course"],
+  tagTypes: ["Refetch_Creator_Course","Refetch_Lecture"],
   baseQuery: fetchBaseQuery({
     baseUrl: COURSE_API,
-    credentials: "include", // Include cookies if needed
+    credentials: "include",
     prepareHeaders: (headers, { endpoint }) => {
       // ✅ Skip setting Content-Type for FormData (editCourse)
       if (endpoint !== "editCourse") {
@@ -45,17 +45,61 @@ export const courseApi = createApi({
       query: ({ formData, courseId }) => ({
         url: `/${courseId}`,
         method: "PUT",
-        body: formData, // ✔️ FormData sets its own headers
+        body: formData,
       }),
       invalidatesTags: ["Refetch_Creator_Course"],
     }),
+
+    // ✅ Get course by ID (GET)
     getCourseById: builder.query({
       query: (courseId) => ({
         url: `/${courseId}`,
-        method:"GET"
-      })
-    })
-  }),
+        method: "GET",
+      }),
+    }),
+
+    // ✅ Create lecture (POST)
+    createLecture: builder.mutation({
+      query: ({ lectureTitle, courseId }) => ({
+        url: `/${courseId}/lecture`,
+        method: "POST",
+        body: { lectureTitle },
+      }),
+    }),
+    getCourseLecture: builder.query({
+      query: (courseId) => ({
+        url: `/${courseId}/lecture`,
+        method: "GET",
+      }),
+      providesTags: ["Refetch_Lecture"],
+    }),
+    editLecture: builder.mutation({
+      query: ({
+        lectureTitle,
+        videoInfo,
+        isPreviewFree,
+        courseId,
+        lectureId,
+      }) => ({
+        url: `/${courseId}/lecture/${lectureId}`,
+        method: "POST",
+        body: { lectureTitle, videoInfo, isPreviewFree },
+      }),
+    }),
+    removeLecture: builder.mutation({
+      query: (lectureId) => ({
+        url: `/lecture/${lectureId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Refetch_Lecture"],
+    }),
+    getLectureById: builder.query({
+      query: (lectureId) => ({
+        url: `/lecture/${lectureId}`,
+        method: "GET",
+      }),
+    }),
+  }), 
 });
 
 // ✅ Export auto-generated hooks
@@ -63,5 +107,10 @@ export const {
   useCreateCourseMutation,
   useGetCreatorCourseQuery,
   useEditCourseMutation,
-  useGetCourseByIdQuery
+  useGetCourseByIdQuery,
+  useCreateLectureMutation,
+  useGetCourseLectureQuery,
+  useEditLectureMutation,
+  useRemoveLectureMutation,
+  useGetLectureByIdQuery,
 } = courseApi;
