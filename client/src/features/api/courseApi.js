@@ -31,6 +31,12 @@ export const courseApi = createApi({
       invalidatesTags: ["Refetch_Creator_Course"],
     }),
 
+    getPublishedCourse: builder.query({
+      query: () => ({
+        url: "/published-courses",
+        method: "GET",
+      }),
+    }),
     // ✅ Get all courses for the logged-in creator (GET)
     getCreatorCourse: builder.query({
       query: () => ({
@@ -99,12 +105,19 @@ export const courseApi = createApi({
         method: "GET",
       }),
     }),
+    publishCourse: builder.mutation({
+      query:({courseId,query}) => ({
+        url:`/${courseId}?publish=${query}`,
+        method:"PATCH"
+      })
+    })
   }), 
 });
 
 // ✅ Export auto-generated hooks
 export const {
   useCreateCourseMutation,
+  useGetPublishedCourseQuery,
   useGetCreatorCourseQuery,
   useEditCourseMutation,
   useGetCourseByIdQuery,
@@ -113,4 +126,5 @@ export const {
   useEditLectureMutation,
   useRemoveLectureMutation,
   useGetLectureByIdQuery,
+  usePublishCourseMutation,
 } = courseApi;

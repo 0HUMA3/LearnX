@@ -1,25 +1,12 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useState, useEffect } from "react";
 import Course from "./Course";
+import { useGetPublishedCourseQuery } from "@/features/api/courseApi";
 
 const Courses = () => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [courses, setCourses] = useState([]);
-
-    // Simulating API call (replace with actual API call)
-    useEffect(() => {
-        setTimeout(() => {
-            setCourses([
-                { id: 1, title: "React Basics", instructor: "John Doe" },
-                { id: 2, title: "Advanced JavaScript", instructor: "Jane Smith" },
-                { id: 3, title: "Full-Stack Development", instructor: "Mark Taylor" },
-                { id: 4, title: "UI/UX Design Principles", instructor: "Emily White" },
-                { id: 5, title: "Full-Stack Development", instructor: "Mark Taylor" },
-                { id: 6, title: "UI/UX Design Principles", instructor: "Emily White" }
-            ]);
-            setIsLoading(false);
-        }, 2000); // Simulating a 2-second API delay
-    }, []);
+    const { data, isLoading, isError } = useGetPublishedCourseQuery();
+    if(isError) return <h1>Some error occurred while fetching courses. </h1>
+    
 
     return (
         <div className="bg-gray-200 min-h-screen py-10">
@@ -33,8 +20,8 @@ const Courses = () => {
                             <CourseSkeleton key={index} />
                         ))
                     ) : (
-                        courses.map((course) => (
-                            <Course key={course.id} {...course} /> // ✅ Corrected
+                        data?.courses && data?.courses.map((course, index) => (
+                            <Course key={index} course={course} /> // ✅ Corrected
                         ))
                     )}
                 </div>
