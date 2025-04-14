@@ -10,7 +10,7 @@ const Course = ({course}) => {
   
 
   return (
-    <Link to={`course-detail/${course._id}`}>
+    <Link to={`/course-detail/${course._id}`}>
       <Card className="overflow-hidden rounded-lg dark:bg-gray-900 bg-gray-100 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
       {/* Image Section */}
       <div className="relative">

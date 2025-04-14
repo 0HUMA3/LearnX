@@ -11,24 +11,34 @@ import {
   getLectureById,
   getPublishedCourse,
   removeLecture,
+  searchCourse,
   togglePublishCourse,
 } from "../controllers/course.controller.js";
 import upload from "../utils/multer.js";
 
 const router = express.Router();
 
-// POST /api/v1/course — Create a course (with thumbnail upload)
+// 🔒 Create course
 router.post(
   "/",
   isAuthenticated,
-  upload.single("courseThumbnail"), // Make sure your form field is named "courseThumbnail"
+  upload.single("courseThumbnail"),
   createCourse
 );
 
-// GET /api/v1/course — Get all courses by creator
+// 🔍 Search courses — define BEFORE dynamic routes
+router.get("/search", isAuthenticated, searchCourse);
+
+// ✅ Get all published courses
+router.get("/published-courses",getPublishedCourse);
+
+// 📚 Get all courses by creator
 router.get("/", isAuthenticated, getCreatorCourses);
 
-// PUT /api/v1/course/:courseId — Update course (with optional new thumbnail)
+// 📘 Get course by ID
+router.get("/:courseId", isAuthenticated, getCourseById);
+
+// ✏️ Edit course
 router.put(
   "/:courseId",
   isAuthenticated,
@@ -36,16 +46,14 @@ router.put(
   editCourse
 );
 
-router.route("/").post(isAuthenticated,createCourse);
-router.route("/published-courses").get(isAuthenticated, getPublishedCourse);
-router.route("/").get(isAuthenticated,getCreatorCourses);
-router.route("/:courseId").put(isAuthenticated,upload.single("courseThumbnail"),editCourse);
-router.route("/:courseId").get(isAuthenticated,getCourseById);
-router.route("/:courseId/lecture").post(isAuthenticated, createLecture);
-router.route("/:courseId/lecture").get(isAuthenticated, getCourseLecture);
-router.route("/:courseId/lecture/:lectureId").post(isAuthenticated, editLecture);
-router.route("/lecture/:lectureId").delete(isAuthenticated, removeLecture);
-router.route("/lecture/:lectureId").get(isAuthenticated, getLectureById);
-router.route("/:courseId").patch(isAuthenticated, togglePublishCourse);
+// 🔀 Toggle publish status
+router.patch("/:courseId", isAuthenticated, togglePublishCourse);
+
+// 🎥 Lecture routes
+router.post("/:courseId/lecture", isAuthenticated, createLecture);
+router.get("/:courseId/lecture", isAuthenticated, getCourseLecture);
+router.post("/:courseId/lecture/:lectureId", isAuthenticated, editLecture);
+router.get("/lecture/:lectureId", isAuthenticated, getLectureById);
+router.delete("/lecture/:lectureId", isAuthenticated, removeLecture);
 
 export default router;

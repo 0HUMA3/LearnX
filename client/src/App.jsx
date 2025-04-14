@@ -18,11 +18,15 @@ import CreateLecture from "./pages/admin/lecture/CreateLecture";
 import EditLecture from "./pages/admin/lecture/EditLecture";
 import CourseDetail from "./pages/student/CourseDetail";
 import CourseProgress from "./pages/student/CourseProgress";
+import SearchPage from "./pages/student/SearchPage";
+import { AdminRoute, AuthenticatedUser, ProtectedRoute } from "./components/ProtectedRoutes";
+import PurchaseCourseProtectedRoute from "./components/PurchaseCourseProtectedRoute";
+import { ThemeProvider } from 'next-themes';
 
 const AdminLayout = () => (
   <div className="flex h-screen">
     <Sidebar />
-    <div className="flex-1 overflow-auto p-5"> 
+    <div className="flex-1 overflow-auto p-5">
       <Outlet />
     </div>
   </div>
@@ -44,27 +48,57 @@ const appRouter = createBrowserRouter([
       },
       {
         path: "login",
-        element: <Login />,
+        element: (
+          <AuthenticatedUser>
+            <Login />
+          </AuthenticatedUser>
+        ),
       },
       {
         path: "my-learning",
-        element: <MyLearning />,
+        element: (
+          <ProtectedRoute>
+            <MyLearning />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "course/search",
+        element: (
+          <ProtectedRoute>
+            <SearchPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "profile",
-        element: <Profile />,
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "course-detail/:courseId",
-        element: <CourseDetail />,
+        element: <ProtectedRoute>
+          <CourseDetail />
+        </ProtectedRoute>
       },
       {
         path: "course-progress/:courseId",
-        element: <CourseProgress />,
+        element: (
+          <ProtectedRoute>
+            <PurchaseCourseProtectedRoute>
+              <CourseProgress />
+            </PurchaseCourseProtectedRoute>
+          </ProtectedRoute>
+        ),
       },
       {
         path: "admin",
-        element: <AdminLayout />,
+        element: <AdminRoute>
+          <AdminLayout />
+        </AdminRoute>,
         children: [
           {
             index: true,
@@ -102,10 +136,12 @@ const appRouter = createBrowserRouter([
 
 function App() {
   return (
-    <main>
-      <RouterProvider router={appRouter} />
-      <ToastContainer position="bottom-center" />
-    </main>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <main>
+        <RouterProvider router={appRouter} />
+        <ToastContainer position="bottom-center" />
+      </main>
+    </ThemeProvider>
   );
 }
 
