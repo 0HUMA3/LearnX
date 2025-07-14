@@ -222,14 +222,18 @@ const CourseTab = () => {
             </div>
             <div>
               <Label>Price in (INR)</Label>
-              <Input
-                type="number"
-                name="coursePrice"
-                value={input.coursePrice}
-                onChange={changeEventHandler}
-                placeholder="199"
-                className="w-fit"
-              />
+              
+              <div className="flex items-center w-[160px] border border-input rounded-md px-3 py-1.5 text-sm shadow-sm focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+    <span className="text-muted-foreground">₹</span>
+    <input
+      type="number"
+      name="coursePrice"
+      value={input.coursePrice}
+      onChange={changeEventHandler}
+      placeholder="199"
+      className="ml-2 w-full outline-none bg-transparent"
+    />
+  </div>
             </div>
           </div>
           <div>

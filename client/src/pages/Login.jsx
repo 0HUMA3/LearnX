@@ -33,7 +33,7 @@ const Login = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation(); // 👈 For accessing route state
+  const location = useLocation();
 
   const [
     registerUser,
@@ -44,6 +44,9 @@ const Login = () => {
     loginUser,
     { data: loginData, error: loginError, isLoading: loginIsLoading, isSuccess: loginIsSuccess },
   ] = useLoginUserMutation();
+
+  // Email validation function
+  const isValidEmail = (email) => /^\S+@\S+\.\S+$/.test(email);
 
   // Handle input changes
   const changeInputHandler = (e, type) => {
@@ -58,6 +61,12 @@ const Login = () => {
   // Handle Registration & Login
   const handleRegistration = async (type) => {
     const inputData = type === "signup" ? signupInput : loginInput;
+
+    // Validate email on signup
+    if (type === "signup" && !isValidEmail(inputData.email)) {
+      return toast.error("Please enter a valid email address");
+    }
+
     const action = type === "signup" ? registerUser : loginUser;
     await action(inputData);
   };
@@ -86,7 +95,7 @@ const Login = () => {
     }
   }, [loginIsSuccess, loginData, loginError, navigate, dispatch]);
 
-  // ✅ Show logout message toast if passed from navigation
+  // Show logout message toast if passed from navigation
   useEffect(() => {
     if (location.state?.message) {
       toast.success(location.state.message);

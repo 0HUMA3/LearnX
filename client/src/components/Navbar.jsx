@@ -64,6 +64,10 @@ const Navbar = () => {
                 <DropdownMenuSeparator className="bg-gray-300 dark:bg-gray-700" />
 
                 <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                    <Link to="/">Home Page</Link>
+                  </DropdownMenuItem>
+
                   <DropdownMenuItem asChild>
                     <Link to="/my-learning">My Learning</Link>
                   </DropdownMenuItem>
