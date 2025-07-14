@@ -116,7 +116,11 @@ export const logout = async (_, res) => {
 export const getUserProfile = async (req, res) => {
     try {
         const userId = req.id; // Assuming authentication middleware adds this
-        const user = await User.findById(userId).select("-password").populate("enrolledCourses");
+        const user = await User.findById(req.id).select("-password").populate("enrolledCourses");
+
+
+//  console.log("Loaded user:", user);
+
 
         if (!user) {
             return res.status(404).json({
@@ -185,3 +189,19 @@ export const updateProfile = async (req, res) => {
         });
     }
 };
+
+// ✅ GET CURRENT USER (used in MyLearning)
+export const getCurrentUser = async (req, res) => {
+    try {
+      const user = await User.findById(req.id).populate("enrolledCourses");
+      console.log("User enrolledCourses:", user.enrolledCourses);
+
+
+      if (!user) return res.status(404).json({ message: "User not found" });
+  
+      res.status(200).json({ user });
+    } catch (error) {
+      console.error("Error loading user:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  };

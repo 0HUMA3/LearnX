@@ -8,6 +8,8 @@ import courseRoute from "./routes/course.route.js";
 import mediaRoute from "./routes/media.route.js";
 import purchaseRoute from "./routes/purchaseCourse.route.js"
 import courseProgressRoute from "./routes/courseProgress.route.js"
+import { stripeWebhook } from "./controllers/coursePurchase.controller.js"; 
+
 
 // ✅ Load environment variables from .env file
 dotenv.config();
@@ -29,12 +31,21 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions)); // Handle preflight requests globally
 
+// Stripe webhook needs raw body parser
+app.post(
+  "/api/v1/stripe/webhook",   // use your actual webhook endpoint path
+  express.raw({ type: "application/json" }),
+  stripeWebhook
+);
+
+
+app.use(cookieParser());
+
 // ✅ Middleware for JSON and URL parsing (increase payload limit if needed)
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ Enable Cookie Parsing
-app.use(cookieParser());
 
 // ✅ API Routes
 app.use("/api/v1/media", mediaRoute);
