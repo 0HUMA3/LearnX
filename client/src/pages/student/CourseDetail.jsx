@@ -20,6 +20,7 @@ const CourseDetail = () => {
     if(isError) return <h1>Failed to load course details</h1>
 
     const {course, purchased} = data;
+    console.log(course);
 
     const handleContinueCourse = () => {
         if(purchased){
@@ -32,7 +33,7 @@ const CourseDetail = () => {
             <div className='bg-[#2D2F31] text-white'>
                 <div className='max-w-7xl mx-auto py-8 px-4 md:px-8 flex flex-col gap-2'>
                     <h1 className='font-bold text-2xl md:text-3xl'>{course?.courseTitle}</h1>
-                    <p className='text-base md:text-lg'>Course Subtitle</p>
+                    <p className='text-base md:text-lg'>{course?.subTitle}</p>
                     <p>Created By{" "} <span className='text-[#C0C4FC] underline italic'>{course?.creator.name}</span></p>
                     <div className='flex items-center gap-2 text-sm'>
                         <BadgeInfo size={16} />
@@ -58,7 +59,7 @@ const CourseDetail = () => {
                                     <div key={idx} className='flex items-center gap-3 text-sm'>
                                         <span>
                                             {
-                                                true ? (<PlayCircle size={14} />) : <Lock size={14} />
+                                                purchased ? (<PlayCircle size={14} />) : <Lock size={14} />
                                             }
                                         </span>
                                         <p>{lecture.lectureTitle}</p>
@@ -81,7 +82,7 @@ const CourseDetail = () => {
                             </div>
                             <h1>Lecture title</h1>
                             <Separator className="my-2" />
-                            <h1 className='text-lg md:text-xl font-semibold'>Course Price</h1>
+                            <h1 className='text-lg md:text-xl font-semibold'>Course Price: ₹{course?.coursePrice}</h1>
                         </CardContent>
                         <CardFooter className="flex justify-center p-4">
                             {purchased ? (
